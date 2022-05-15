@@ -319,4 +319,19 @@ public class c5_CreatingSequence {
             .expectNextCount(100)
             .verifyComplete();
     }
+
+    /**
+     * duplicates each value.
+     */
+    @Test
+    public void quadro_values() {
+        Flux<Integer> result =  Flux.range(1, 10)
+            .flatMap(v -> Flux.just(v * v))
+            .doOnNext(n -> System.out.println("duplicated: " + n));
+
+        StepVerifier.create(result)
+            .expectNext(1, 4, 9, 16, 25)
+            .expectNextCount(5)
+            .verifyComplete();
+    }
 }
