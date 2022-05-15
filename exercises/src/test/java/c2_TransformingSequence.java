@@ -139,4 +139,20 @@ public class c2_TransformingSequence extends TransformingSequenceBase {
                     .expectNext(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
                     .verifyComplete();
     }
+
+    /**
+     * A developer received the ProjectHolder object from Mono, which holds list of project ids. Developer what to
+     * transform it Flux of Long's (project id's).
+     */
+    @Test
+    public void list_of_ids_to_flux() {
+       Flux<Long> result = project_service()
+            .mapNotNull(ProjectHolder::getPojectIds)
+            .flatMapMany(Flux::fromIterable);
+
+        StepVerifier.create(result)
+            .expectNext(1L, 3L, 9L)
+            .verifyComplete();
+
+    }
 }

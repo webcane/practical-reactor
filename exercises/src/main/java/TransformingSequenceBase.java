@@ -1,3 +1,4 @@
+import java.util.List;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -20,6 +21,17 @@ public class TransformingSequenceBase {
 
     public Mono<String> maybe_service() {
         return Mono.empty();
+    }
+
+    public Mono<ProjectHolder> project_service() {
+        return Mono.just(new ProjectHolder());
+    }
+
+    static class ProjectHolder {
+        private final List<Long> projectsIds = List.of(1L, 3L, 9L);
+        public List<Long> getPojectIds() {
+            return projectsIds;
+        }
     }
 
 }
