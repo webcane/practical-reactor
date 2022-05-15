@@ -211,10 +211,11 @@ public class c6_CombiningPublishers extends CombiningPublishersBase {
      */
     @Test
     public void prettify() {
-        Mono<Boolean> successful = openFile()
-            .then(writeToFile("0x3522285912341"))
-            .then(closeFile())
-            .thenReturn(true);
+        Mono<Boolean> successful =
+            Mono.when(openFile())
+                .then(writeToFile("0x3522285912341"))
+                .then(closeFile())
+                .thenReturn(true);
 
         //don't change below this line
         StepVerifier.create(successful)
@@ -231,10 +232,8 @@ public class c6_CombiningPublishers extends CombiningPublishersBase {
      */
     @Test
     public void one_to_n() {
-        //todo: feel free to change code as you need
-        Flux<String> fileLines = null;
-        openFile();
-        readFile();
+        Flux<String> fileLines = Mono.when(openFile())
+            .thenMany(readFile());
 
         StepVerifier.create(fileLines)
                     .expectNext("0x1", "0x2", "0x3")
