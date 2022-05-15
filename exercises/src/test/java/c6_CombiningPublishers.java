@@ -37,10 +37,9 @@ public class c6_CombiningPublishers extends CombiningPublishersBase {
     public void behold_flatmap() {
         Hooks.enableContextLossTracking(); //used for testing - detects if you are cheating!
 
-        //todo: feel free to change code as you need
-        Mono<String> currentUserEmail = null;
-        Mono<String> currentUserMono = getCurrentUser();
-        getUserEmail(null);
+        Mono<String> currentUserEmail = getCurrentUser()
+            .flatMap(s -> getUserEmail(s)); // transfer data from one mono to another one
+
 
         //don't change below this line
         StepVerifier.create(currentUserEmail)
@@ -57,9 +56,8 @@ public class c6_CombiningPublishers extends CombiningPublishersBase {
      */
     @Test
     public void task_executor() {
-        //todo: feel free to change code as you need
-        Flux<Void> tasks = null;
-        taskExecutor();
+        Flux<Void> tasks = taskExecutor()
+            .flatMap(s -> s); // Flux<Mono<Message>> -> Flux<Message>
 
         //don't change below this line
         StepVerifier.create(tasks)
@@ -76,9 +74,8 @@ public class c6_CombiningPublishers extends CombiningPublishersBase {
      */
     @Test
     public void streaming_service() {
-        //todo: feel free to change code as you need
-        Flux<Message> messageFlux = null;
-        streamingService();
+        Flux<Message> messageFlux = streamingService()
+            .flatMapMany(s -> s); // Mono<Flux<Message>> -> Flux<Message)
 
         //don't change below this line
         StepVerifier.create(messageFlux)
@@ -95,10 +92,8 @@ public class c6_CombiningPublishers extends CombiningPublishersBase {
      */
     @Test
     public void i_am_rubber_you_are_glue() {
-        //todo: feel free to change code as you need
-        Flux<Integer> numbers = null;
-        numberService1();
-        numberService2();
+        Flux<Integer> numbers = Flux.concat(numberService1(), numberService2());
+//            numberService1().concatWith(numberService2());
 
         //don't change below this line
         StepVerifier.create(numbers)
@@ -121,9 +116,8 @@ public class c6_CombiningPublishers extends CombiningPublishersBase {
      */
     @Test
     public void task_executor_again() {
-        //todo: feel free to change code as you need
-        Flux<Void> tasks = null;
-        taskExecutor();
+        Flux<Void> tasks = taskExecutor()
+            .concatMap(s -> s); // однопоточный flatMap. за счет этого сохраняет порядок добавления
 
         //don't change below this line
         StepVerifier.create(tasks)
@@ -139,10 +133,7 @@ public class c6_CombiningPublishers extends CombiningPublishersBase {
      */
     @Test
     public void need_for_speed() {
-        //todo: feel free to change code as you need
-        Flux<String> stonks = null;
-        getStocksGrpc();
-        getStocksRest();
+        Flux<String> stonks = Flux.firstWithSignal(getStocksGrpc(), getStocksRest());
 
         //don't change below this line
         StepVerifier.create(stonks)
@@ -157,10 +148,8 @@ public class c6_CombiningPublishers extends CombiningPublishersBase {
      */
     @Test
     public void plan_b() {
-        //todo: feel free to change code as you need
-        Flux<String> stonks = null;
-        getStocksLocalCache();
-        getStocksRest();
+        Flux<String> stonks = getStocksLocalCache()
+            .switchIfEmpty(getStocksRest());
 
         //don't change below this line
         StepVerifier.create(stonks)
@@ -176,10 +165,16 @@ public class c6_CombiningPublishers extends CombiningPublishersBase {
      */
     @Test
     public void mail_box_switcher() {
-        //todo: feel free to change code as you need
-        Flux<Message> myMail = null;
-        mailBoxPrimary();
-        mailBoxSecondary();
+        Flux<Message> myMail = mailBoxPrimary()
+            .switchOnFirst((signal, flux) -> { // переключиться на другой flux если в первом что-то не то
+                if (signal.hasValue()) {
+                    Message firstColor = signal.get();
+                    if ("spam".equals(firstColor.metaData)) {
+                        return mailBoxSecondary();
+                    }
+                }
+                return flux;
+            });
 
         //don't change below this line
         StepVerifier.create(myMail)
@@ -199,11 +194,8 @@ public class c6_CombiningPublishers extends CombiningPublishersBase {
      */
     @Test
     public void instant_search() {
-        //todo: feel free to change code as you need
-        autoComplete(null);
         Flux<String> suggestions = userSearchInput()
-                //todo: use one operator only
-                ;
+            .switchMap(this::autoComplete); // flatMap Latest
 
         //don't change below this line
         StepVerifier.create(suggestions)
@@ -219,13 +211,10 @@ public class c6_CombiningPublishers extends CombiningPublishersBase {
      */
     @Test
     public void prettify() {
-        //todo: feel free to change code as you need
-        //todo: use when,and,then...
-        Mono<Boolean> successful = null;
-
-        openFile();
-        writeToFile("0x3522285912341");
-        closeFile();
+        Mono<Boolean> successful = openFile()
+            .then(writeToFile("0x3522285912341"))
+            .then(closeFile())
+            .thenReturn(true);
 
         //don't change below this line
         StepVerifier.create(successful)
