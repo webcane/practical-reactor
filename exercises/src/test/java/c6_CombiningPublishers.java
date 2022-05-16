@@ -246,10 +246,9 @@ public class c6_CombiningPublishers extends CombiningPublishersBase {
      */
     @Test
     public void acid_durability() {
-        //todo: feel free to change code as you need
         Flux<String> committedTasksIds = null;
-        tasksToExecute();
-        commitTask(null);
+        tasksToExecute().map(i -> i.thenMany(this::commitTask))
+        ;
 
         //don't change below this line
         StepVerifier.create(committedTasksIds)
