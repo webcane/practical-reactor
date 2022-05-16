@@ -246,9 +246,10 @@ public class c6_CombiningPublishers extends CombiningPublishersBase {
      */
     @Test
     public void acid_durability() {
-        Flux<String> committedTasksIds = null;
-        tasksToExecute().map(i -> i.thenMany(this::commitTask))
-        ;
+        Flux<String> committedTasksIds = tasksToExecute()
+            .concatMap(task -> task // run ordered tasks
+                .flatMap(taskId -> commitTask(taskId) // commit each task
+                    .thenReturn(taskId))); // return original tasks
 
         //don't change below this line
         StepVerifier.create(committedTasksIds)

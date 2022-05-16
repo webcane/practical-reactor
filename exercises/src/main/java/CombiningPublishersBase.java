@@ -153,7 +153,7 @@ public class CombiningPublishersBase {
 
     public Mono<Void> commitTask(String taskId) {
         committedTasksCounter.incrementAndGet();
-        return Mono.fromRunnable(() -> System.out.println("Task committed:" + taskId));
+        return Mono.fromRunnable(() -> System.out.println("Task committed: " + taskId));
     }
 
     public Flux<String> microsoftTitles() {
