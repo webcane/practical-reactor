@@ -296,10 +296,8 @@ public class c6_CombiningPublishers extends CombiningPublishersBase {
      */
     @Test
     public void car_factory() {
-        //todo: feel free to change code as you need
-        Flux<Car> producedCars = null;
-        carChassisProducer();
-        carEngineProducer();
+        Flux<Car> producedCars = Flux.zip(carChassisProducer(), carEngineProducer(), carEngineProducer()) //.zipWith()
+            .map((i) -> new Car(i.getT1(), i.getT2())); // синхронно объеденить 2 producer в один объект
 
         //don't change below this line
         StepVerifier.create(producedCars)
@@ -320,9 +318,9 @@ public class c6_CombiningPublishers extends CombiningPublishersBase {
 
     //todo: implement this method based on instructions
     public Mono<String> chooseSource() {
-        sourceA(); //<- choose if sourceRef == "A"
-        sourceB(); //<- choose if sourceRef == "B"
-        return Mono.empty(); //otherwise, return empty
+       // sourceA(); //<- choose if sourceRef == "A"
+       // sourceB(); //<- choose if sourceRef == "B"
+        return Mono.from((sourceRef.get() == "A" ? sourceA() : (sourceRef.get() == "B" ? sourceB() : Mono.empty())));
     }
 
     @Test
