@@ -1,3 +1,5 @@
+import java.util.HashMap;
+import java.util.Map;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -243,6 +245,49 @@ public class CombiningPublishersBase {
         public Car(Chassis chassis, Engine engine) {
             this.chassis = chassis;
             this.engine = engine;
+        }
+    }
+
+    public Mono<User> loadUser() {
+        return Mono.just(new MyUser());
+    }
+
+    public interface User {
+        Map<String, Object> getClaims();
+
+        UserInfo getUserInfo();
+
+        IdToken getIdToken();
+    }
+
+    public static class UserInfo {
+
+    }
+
+    public static class IdToken {
+
+    }
+
+    public static class MyUser implements User {
+
+        @Override
+        public Map<String, Object> getClaims() {
+            Map<String, Object> claims = new HashMap<>();
+            return claims;
+        }
+
+        @Override
+        public UserInfo getUserInfo() {
+            return new UserInfo();
+        }
+
+        @Override
+        public IdToken getIdToken() {
+            return new IdToken();
+        }
+
+        public static String getEmail(User user) {
+            return (String) user.getClaims().get("email");
         }
     }
 }

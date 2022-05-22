@@ -259,6 +259,12 @@ public class c6_CombiningPublishers extends CombiningPublishersBase {
         Assertions.assertEquals(3, committedTasksCounter.get());
     }
 
+//    public void load_user() {
+//        loadUser()
+//            .flatMap(user -> Mono.just(MyUser.getEmail(user)))
+//    }
+
+
 
     /**
      * News have come that Microsoft is buying Blizzard and there will be a major merger.
@@ -266,10 +272,8 @@ public class c6_CombiningPublishers extends CombiningPublishersBase {
      */
     @Test
     public void major_merger() {
-        //todo: feel free to change code as you need
         Flux<String> microsoftBlizzardCorp =
-                microsoftTitles();
-        blizzardTitles();
+                microsoftTitles().mergeWith(blizzardTitles());
 
         //don't change below this line
         StepVerifier.create(microsoftBlizzardCorp)
