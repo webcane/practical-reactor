@@ -89,7 +89,7 @@ public class c7_ErrorHandling extends ErrorHandlingBase {
     @Test
     public void have_a_backup() {
         Flux<String> messages = messageNode()
-            .onErrorResume(e -> backupMessageNode());
+            .onErrorResume(e -> backupMessageNode()); // Fallback
 
         //don't change below this line
         StepVerifier.create(messages)
@@ -156,9 +156,8 @@ public class c7_ErrorHandling extends ErrorHandlingBase {
     @Test
     public void billion_dollar_mistake() {
         Flux<String> content = getFilesContent()
-                .flatMap(Function.identity())
-                //todo: change this line only
-                ;
+            .flatMap(Function.identity()) // Flux<Mono<String>> -> Flux<String>
+            .onErrorContinue((e, o) -> System.out.println("Error occurred while reading file: " + e.getMessage()));
 
         StepVerifier.create(content)
                     .expectNext("file1.txt content", "file3.txt content")
