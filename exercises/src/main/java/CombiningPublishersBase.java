@@ -1,5 +1,3 @@
-import java.util.HashMap;
-import java.util.Map;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -155,7 +153,7 @@ public class CombiningPublishersBase {
 
     public Mono<Void> commitTask(String taskId) {
         committedTasksCounter.incrementAndGet();
-        return Mono.fromRunnable(() -> System.out.println("Task committed: " + taskId));
+        return Mono.fromRunnable(() -> System.out.println("Task committed:" + taskId));
     }
 
     public Flux<String> microsoftTitles() {
@@ -248,46 +246,26 @@ public class CombiningPublishersBase {
         }
     }
 
-    public Mono<User> loadUser() {
-        return Mono.just(new MyUser());
-    }
+    public static class StreamingConnection {
 
-    public interface User {
-        Map<String, Object> getClaims();
+        public static AtomicBoolean isOpen = new AtomicBoolean();
+        public static AtomicBoolean cleanedUp = new AtomicBoolean();
 
-        UserInfo getUserInfo();
-
-        IdToken getIdToken();
-    }
-
-    public static class UserInfo {
-
-    }
-
-    public static class IdToken {
-
-    }
-
-    public static class MyUser implements User {
-
-        @Override
-        public Map<String, Object> getClaims() {
-            Map<String, Object> claims = new HashMap<>();
-            return claims;
+        public static Mono<Flux<String>> startStreaming() {
+            return Mono.just(Flux.range(1, 20).map(i -> "Message #" + i)
+                       .delayElements(Duration.ofMillis(250))
+                       .doOnNext(s -> System.out.println("Sending message: " + s))
+                       .doFirst(() -> {
+                           System.out.println("Streaming started!");
+                           isOpen.set(true);
+                       }));
         }
 
-        @Override
-        public UserInfo getUserInfo() {
-            return new UserInfo();
-        }
-
-        @Override
-        public IdToken getIdToken() {
-            return new IdToken();
-        }
-
-        public static String getEmail(User user) {
-            return (String) user.getClaims().get("email");
+        public static Mono<Void> closeConnection() {
+            return Mono.empty().doFirst(() -> {
+                System.out.println("Streaming stopped! Cleaning up...");
+                cleanedUp.set(true);
+            }).then();
         }
     }
 }

@@ -1,4 +1,5 @@
 import org.junit.jupiter.api.*;
+import reactor.blockhound.BlockHound;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
@@ -7,6 +8,7 @@ import reactor.test.StepVerifier;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 
 /**
  * In this important chapter we are going to cover different ways of combining publishers.
@@ -348,4 +350,27 @@ public class c6_CombiningPublishers extends CombiningPublishersBase {
                     .verifyComplete();
     }
 
+    /**
+     * Sometimes you need to clean up after your self.
+     * Open a connection to a streaming service and after all elements have been consumed,
+     * close connection (invoke closeConnection()), without blocking.
+     *
+     * This may look easy...
+     */
+    @Test
+    public void cleanup() {
+        BlockHound.install(); //don't change this line, blocking = cheating!
+
+        //todo: feel free to change code as you need
+        Flux<String> stream = StreamingConnection.startStreaming()
+                                                 .flatMapMany(Function.identity());
+        StreamingConnection.closeConnection();
+
+        //don't change below this line
+        StepVerifier.create(stream)
+                    .then(()-> Assertions.assertTrue(StreamingConnection.isOpen.get()))
+                    .expectNextCount(20)
+                    .verifyComplete();
+        Assertions.assertTrue(StreamingConnection.cleanedUp.get());
+    }
 }
