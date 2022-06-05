@@ -1,4 +1,5 @@
 import org.junit.jupiter.api.*;
+import reactor.blockhound.shaded.net.bytebuddy.build.Plugin;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
@@ -33,11 +34,11 @@ public class c8_Sinks extends SinksBase {
      */
     @Test
     public void single_shooter() {
-        //todo: feel free to change code as you need
-        Mono<Boolean> operationCompleted = null;
+        Sinks.One<Boolean> sink = Sinks.one();
+        Mono<Boolean> operationCompleted = sink.asMono();
         submitOperation(() -> {
-
-            doSomeWork(); //don't change this line
+            doSomeWork();
+            sink.tryEmitValue(true);
         });
 
         //don't change code below
