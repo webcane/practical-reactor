@@ -179,6 +179,7 @@ public class c7_ErrorHandling extends ErrorHandlingBase {
     @Test
     public void resilience() {
         Flux<String> content = getFilesContent()
+            .log()
             .flatMap(file -> file
                 .doOnError(e -> System.out.println("Error occurred while reading file: " + e.getMessage()))
                 .onErrorResume(e -> Mono.empty()));
@@ -195,8 +196,8 @@ public class c7_ErrorHandling extends ErrorHandlingBase {
     @Test
     public void its_hot_in_here() {
         Mono<Integer> temperature = temperatureSensor()
-                //todo: change this line only
-                ;
+            .doOnError(System.err::println)
+            .retry(5); // retry max 5 times while do receive not error
 
         StepVerifier.create(temperature)
                     .expectNext(34)
