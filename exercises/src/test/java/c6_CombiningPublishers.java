@@ -38,7 +38,7 @@ public class c6_CombiningPublishers extends CombiningPublishersBase {
         Hooks.enableContextLossTracking(); //used for testing - detects if you are cheating!
 
         Mono<String> currentUserEmail = getCurrentUser()
-            .flatMap(s -> getUserEmail(s)); // transfer data from one mono to another one
+            .flatMap(this::getUserEmail); // transfer data from one mono to another one
 
 
         //don't change below this line
@@ -296,8 +296,8 @@ public class c6_CombiningPublishers extends CombiningPublishersBase {
      */
     @Test
     public void car_factory() {
-        Flux<Car> producedCars = Flux.zip(carChassisProducer(), carEngineProducer(), carEngineProducer()) //.zipWith()
-            .map((i) -> new Car(i.getT1(), i.getT2())); // синхронно объеденить 2 producer в один объект
+        Flux<Car> producedCars = Flux.zip(carChassisProducer(), carEngineProducer()) //.zipWith()
+            .map(i -> new Car(i.getT1(), i.getT2())); // синхронно объеденить 2 producer в один объект
 
         //don't change below this line
         StepVerifier.create(producedCars)
