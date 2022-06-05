@@ -319,11 +319,17 @@ public class c6_CombiningPublishers extends CombiningPublishersBase {
     //only read from sourceRef
     AtomicReference<String> sourceRef = new AtomicReference<>("X");
 
-    //todo: implement this method based on instructions
     public Mono<String> chooseSource() {
-       // sourceA(); //<- choose if sourceRef == "A"
-       // sourceB(); //<- choose if sourceRef == "B"
-        return Mono.from((sourceRef.get() == "A" ? sourceA() : (sourceRef.get() == "B" ? sourceB() : Mono.empty())));
+        // return Mono.fromSupplier(() -> sourceA()); // Mono<String> -> Mono<Mono<String>>
+        return Mono.defer(() -> { // Mono<String> -> Mono<String>
+            if ("A" == sourceRef.get()) {
+                return sourceA();
+            } else if ("B" == sourceRef.get()) {
+                return sourceB();
+            } else {
+                return Mono.empty();
+            }
+        });
     }
 
     @Test
