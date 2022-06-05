@@ -178,11 +178,11 @@ public class c7_ErrorHandling extends ErrorHandlingBase {
      */
     @Test
     public void resilience() {
-        //todo: change code as you need
         Flux<String> content = getFilesContent()
-                .flatMap(Function.identity()); //start from here
+            .flatMap(file -> file
+                .doOnError(e -> System.out.println("Error occurred while reading file: " + e.getMessage()))
+                .onErrorResume(e -> Mono.empty()));
 
-        //don't change below this line
         StepVerifier.create(content)
                     .expectNext("file1.txt content", "file3.txt content")
                     .verifyComplete();
