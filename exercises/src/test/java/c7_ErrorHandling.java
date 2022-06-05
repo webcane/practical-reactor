@@ -1,3 +1,4 @@
+import java.time.Duration;
 import org.junit.jupiter.api.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -34,9 +35,11 @@ public class c7_ErrorHandling extends ErrorHandlingBase {
     public void houston_we_have_a_problem() {
         AtomicReference<Throwable> errorRef = new AtomicReference<>();
         Flux<String> heartBeat = probeHeartBeatSignal()
-                //todo: do your changes here
-                //todo: & here
-                ;
+            .timeout(Duration.ofSeconds(3))
+            .doOnError((e) -> {
+                System.out.println(e);
+                errorRef.set(e);
+            });
 
         StepVerifier.create(heartBeat)
                     .expectNextCount(3)
