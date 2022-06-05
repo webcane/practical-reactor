@@ -7,6 +7,7 @@ import reactor.test.StepVerifier;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+import reactor.util.retry.Retry;
 
 /**
  * It's time introduce some resiliency by recovering from unexpected events!
@@ -212,8 +213,9 @@ public class c7_ErrorHandling extends ErrorHandlingBase {
     @Test
     public void back_off() {
         Mono<String> connection_result = establishConnection()
-                //todo: change this line only
-                ;
+            .doOnError(e -> System.out.println("Unable to establish connection. try again after delay"))
+            .retryWhen(Retry.backoff(3, Duration.ofSeconds(3))) // retry 3 times. wait after each error 3s.
+            .doOnNext(System.out::println);
 
         StepVerifier.create(connection_result)
                     .expectNext("connection_established")
