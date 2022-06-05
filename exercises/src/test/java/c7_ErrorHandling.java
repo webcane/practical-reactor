@@ -57,9 +57,10 @@ public class c7_ErrorHandling extends ErrorHandlingBase {
     @Test
     public void potato_potato() {
         Mono<String> currentUser = getCurrentUser()
-                //todo: change this line only
-                //use SecurityException
-                ;
+            .onErrorMap(t -> {
+                System.out.println(t);
+                return new SecurityException(t);
+            });
 
         StepVerifier.create(currentUser)
                     .expectErrorMatches(e -> e instanceof SecurityException &&
@@ -73,9 +74,8 @@ public class c7_ErrorHandling extends ErrorHandlingBase {
      */
     @Test
     public void under_the_rug() {
-        Flux<String> messages = messageNode();
-        //todo: change this line only
-        ;
+        Flux<String> messages = messageNode()
+            .onErrorResume(e -> Flux.empty()); // to finish consuming, replace error with empty flux
 
         StepVerifier.create(messages)
                     .expectNext("0x1", "0x2")
