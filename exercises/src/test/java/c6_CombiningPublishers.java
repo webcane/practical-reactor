@@ -296,8 +296,11 @@ public class c6_CombiningPublishers extends CombiningPublishersBase {
      */
     @Test
     public void car_factory() {
-        Flux<Car> producedCars = Flux.zip(carChassisProducer(), carEngineProducer()) //.zipWith()
-            .map(i -> new Car(i.getT1(), i.getT2())); // синхронно объеденить 2 producer в один объект
+//        Flux<Car> producedCars = Flux.zip(carChassisProducer(), carEngineProducer())
+//            .map(i -> new Car(i.getT1(), i.getT2())); // синхронно объеденить 2 producer в один объект
+        Flux<Car> producedCars = carChassisProducer()
+            .zipWith(carEngineProducer(),
+                ((chassis, engine) -> new Car(chassis, engine)));
 
         //don't change below this line
         StepVerifier.create(producedCars)
