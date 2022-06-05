@@ -104,8 +104,7 @@ public class c7_ErrorHandling extends ErrorHandlingBase {
     @Test
     public void error_reporter() {
         Flux<String> messages = messageNode()
-            .onErrorResume(e -> errorReportService(e)
-                .then(Mono.error(e)));
+            .onErrorResume(this::reportErrorRethrow);
 
         //don't change below this line
         StepVerifier.create(messages)
@@ -113,6 +112,11 @@ public class c7_ErrorHandling extends ErrorHandlingBase {
                     .expectError(RuntimeException.class)
                     .verify();
         Assertions.assertTrue(errorReported.get());
+    }
+
+    protected Mono<String> reportErrorRethrow(Throwable e) {
+        return errorReportService(e)
+            .then(Mono.error(e));
     }
 
     /**
@@ -123,13 +127,25 @@ public class c7_ErrorHandling extends ErrorHandlingBase {
     @Test
     public void unit_of_work() {
         Flux<Task> taskFlux = taskQueue()
-                //todo: do your changes here
-                ;
+            .flatMap(this::handleTask);
 
         StepVerifier.create(taskFlux)
                     .expectNextMatches(task -> task.executedExceptionally.get())
                     .expectNextMatches(task -> task.executedSuccessfully.get())
                     .verifyComplete();
+    }
+
+    /**
+     * handle task (execute and commit) or rollback in case of error.
+     *
+     * @param task
+     * @return
+     */
+    protected Mono<Task> handleTask(Task task) {
+       return task.execute()
+            .then(task.commit())
+            .onErrorResume(task::rollback)
+            .thenReturn(task);
     }
 
     /**
