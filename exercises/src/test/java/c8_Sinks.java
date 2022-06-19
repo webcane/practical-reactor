@@ -55,7 +55,9 @@ public class c8_Sinks extends SinksBase {
      */
     @Test
     public void single_subscriber() {
-                Sinks.Many<Integer> sink = Sinks.many().unicast().onBackpressureBuffer();
+        Sinks.Many<Integer> sink = Sinks.many()
+            .unicast().onBackpressureBuffer();
+
         Flux<Integer> measurements = sink.asFlux();
         submitOperation(() -> {
             List<Integer> measures_readings = get_measures_readings(); //don't change this line
@@ -76,7 +78,9 @@ public class c8_Sinks extends SinksBase {
      */
     @Test
     public void it_gets_crowded() {
-        Sinks.Many<Integer> sink = Sinks.many().multicast().onBackpressureBuffer();
+        Sinks.Many<Integer> sink = Sinks.many()
+            .multicast().onBackpressureBuffer();
+
         Flux<Integer> measurements = sink.asFlux();
         submitOperation(() -> {
             List<Integer> measures_readings = get_measures_readings(); //don't change this line
@@ -100,8 +104,9 @@ public class c8_Sinks extends SinksBase {
      */
     @Test
     public void open_24_7() {
-        //todo: set autoCancel parameter to prevent sink from closing
-        Sinks.Many<Integer> sink = Sinks.many().multicast().onBackpressureBuffer();
+        Sinks.Many<Integer> sink = Sinks.many()
+            .multicast().onBackpressureBuffer(3, false);
+
         Flux<Integer> flux = sink.asFlux();
 
         //don't change code below
