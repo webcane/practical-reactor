@@ -1,12 +1,11 @@
-import org.junit.jupiter.api.*;
-import reactor.blockhound.shaded.net.bytebuddy.build.Plugin;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.core.publisher.Sinks;
-import reactor.test.StepVerifier;
-
 import java.time.Duration;
 import java.util.List;
+import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.publisher.SignalType;
+import reactor.core.publisher.Sinks;
+import reactor.test.StepVerifier;
 
 /**
  * In Reactor a Sink allows safe manual triggering of signals. We will learn more about multicasting and backpressure in
@@ -192,12 +191,11 @@ public class c8_Sinks extends SinksBase {
      */
     @Test
     public void emit_failure() {
-        //todo: feel free to change code as you need
         Sinks.Many<Integer> sink = Sinks.many().replay().all();
 
         for (int i = 1; i <= 50; i++) {
             int finalI = i;
-            new Thread(() -> sink.tryEmitNext(finalI)).start();
+            new Thread(() -> sink.emitNext(finalI, new ReplayEmitHandler())).start();
         }
 
         //don't change code below
@@ -206,5 +204,13 @@ public class c8_Sinks extends SinksBase {
                                 .take(50))
                     .expectNextCount(50)
                     .verifyComplete();
+    }
+    static class ReplayEmitHandler implements Sinks.EmitFailureHandler {
+
+        @Override
+        public boolean onEmitFailure(SignalType signalType, Sinks.EmitResult emitResult) {
+            //  retry the emission if it was failed
+            return emitResult.equals(Sinks.EmitResult.FAIL_NON_SERIALIZED);
+        }
     }
 }
