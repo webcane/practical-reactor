@@ -1,6 +1,12 @@
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.*;
+import java.time.Duration;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import reactor.blockhound.BlockHound;
 import reactor.core.Exceptions;
 import reactor.core.Scannable;
@@ -8,12 +14,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.NonBlocking;
 import reactor.test.StepVerifier;
-
-import java.time.Duration;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * With multi-core architectures being a commodity nowadays, being able to easily parallelize work is important.
@@ -46,9 +46,8 @@ public class c9_ExecutionControl extends ExecutionControlBase {
     public void slow_down_there_buckaroo() {
         long threadId = Thread.currentThread().getId();
         Flux<String> notifications = readNotifications()
-                .doOnNext(System.out::println)
-                //todo: change this line only
-                ;
+            .delayElements(Duration.ofSeconds(1)) // uses the Schedulers.parallel()
+            .doOnNext(System.out::println);
 
         StepVerifier.create(notifications
                                     .doOnNext(s -> assertThread(threadId)))
