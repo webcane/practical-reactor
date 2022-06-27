@@ -13,6 +13,7 @@ import reactor.core.Scannable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.NonBlocking;
+import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
 
 /**
@@ -101,7 +102,7 @@ public class c9_ExecutionControl extends ExecutionControlBase {
                                   assert NonBlocking.class.isAssignableFrom(Thread.currentThread().getClass());
                                   System.out.println("Task executing on: " + currentThread.getName());
                               })
-                              //todo: change this line only
+                            .subscribeOn(Schedulers.parallel())
                               .then();
 
         StepVerifier.create(task)
