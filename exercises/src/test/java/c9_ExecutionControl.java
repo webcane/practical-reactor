@@ -73,10 +73,9 @@ public class c9_ExecutionControl extends ExecutionControlBase {
      */
     @Test
     public void ready_set_go() {
-        //todo: feel free to change code as you need
         Flux<String> tasks = tasks()
-                .flatMap(Function.identity());
-        semaphore();
+            // put in order all tasks, run each subscription with delay
+            .concatMap(task -> task.delaySubscription(semaphore()));
 
         //don't change code below
         StepVerifier.create(tasks)
