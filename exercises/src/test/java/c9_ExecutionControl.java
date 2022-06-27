@@ -132,7 +132,7 @@ public class c9_ExecutionControl extends ExecutionControlBase {
     @Test
     public void free_runners() {
         Mono<Void> task = Mono.fromRunnable(blockingRunnable())
-            .subscribeOn(Schedulers.newBoundedElastic(3, 3, "thre"))
+            .subscribeOn(Schedulers.boundedElastic())
             .then();
 
         Flux<Void> taskQueue = Flux.just(task, task, task)
