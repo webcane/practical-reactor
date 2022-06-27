@@ -119,7 +119,7 @@ public class c9_ExecutionControl extends ExecutionControlBase {
         BlockHound.install(); //don't change this line
 
         Mono<Void> task = Mono.fromRunnable(this::blockingRunnable)
-                              //todo: change this line only
+                            .subscribeOn(Schedulers.boundedElastic()) // blocking
                               .then();
 
         StepVerifier.create(task)
