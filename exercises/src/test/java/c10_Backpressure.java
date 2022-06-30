@@ -139,11 +139,10 @@ public class c10_Backpressure extends BackpressureBase {
     @Test
     public void u_wont_brake_me() {
         Flux<String> messageStream = messageStream4()
-                //todo: change this line only
-                ;
+            .onBackpressureBuffer();
 
-        StepVerifier.create(messageStream, StepVerifierOptions.create()
-                                                              .initialRequest(0))
+        StepVerifier.create(messageStream,
+                StepVerifierOptions.create().initialRequest(0))
                     .expectSubscription()
                     .thenRequest(3)
                     .then(() -> pub4.next("A", "B", "C", "D"))
