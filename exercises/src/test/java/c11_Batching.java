@@ -1,4 +1,6 @@
-import org.junit.jupiter.api.*;
+import java.time.Duration;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
@@ -63,8 +65,9 @@ public class c11_Batching extends BatchingBase {
     @Test
     public void sum_over_time() {
         Flux<Long> metrics = metrics()
-                //todo: implement your changes here
-                .take(10);
+            .window(Duration.ofSeconds(1))
+            .flatMap(w -> w.reduce(Long::sum))
+            .take(10);
 
         StepVerifier.create(metrics)
                     .expectNext(45L, 165L, 255L, 396L, 465L, 627L, 675L, 858L, 885L, 1089L)
