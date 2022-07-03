@@ -26,10 +26,9 @@ public class c11_Batching extends BatchingBase {
      */
     @Test
     public void batch_writer() {
-        //todo do your changes here
-        Flux<Void> dataStream = null;
-        dataStream();
-        writeToDisk(null);
+        Flux<Void> dataStream = dataStream()
+            .buffer(10)
+            .flatMap(this::writeToDisk);
 
         //do not change the code below
         StepVerifier.create(dataStream)
