@@ -1,5 +1,7 @@
+import java.time.Duration;
 import org.junit.jupiter.api.*;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.util.Arrays;
@@ -25,6 +27,22 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class c12_Broadcasting extends BroadcastingBase {
 
+    @Test
+    public void lazy_publisher() {
+        Mono<String> deferMsg = Mono.defer(
+            () -> Mono.just("Lazy Publisher"))
+            .doOnNext(System.out::println);
+
+        StepVerifier.create(deferMsg)
+            .expectNext("Lazy Publisher")
+            .verifyComplete();
+
+        StepVerifier
+            .create(deferMsg.delayElement(Duration.ofSeconds(2)))
+            .expectNext("Lazy Publisher")
+            .verifyComplete();
+    }
+
     /**
      * Split incoming message stream into two streams, one contain user that sent message and second that contains
      * message payload.
@@ -32,8 +50,7 @@ public class c12_Broadcasting extends BroadcastingBase {
     @Test
     public void sharing_is_caring() throws InterruptedException {
         Flux<Message> messages = messageStream()
-                //todo: do your changes here
-                ;
+            .publish().refCount(2);
 
         //don't change code below
         Flux<String> userStream = messages.map(m -> m.user);
